@@ -1,0 +1,15 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    audite-lib (0.4.5)
+    tinkerforge (2.1.26)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  audite-lib
+  tinkerforge
+
+BUNDLED WITH
+   2.1.2
