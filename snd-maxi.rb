@@ -27,8 +27,8 @@ class Sensors
   
   attr_accessor :connection
 
-  def initialize(uids, host, port, secret)
-    @secret = secret
+  def initialize(settings)
+    @secret = settings['secret']
 
     @nfc_status = {state: 'pending'}
     
@@ -48,14 +48,14 @@ class Sensors
     @connection = IPConnection.new
     @connection.set_auto_reconnect false
 
-    @master_brick = BrickMaster.new uids[:MASTER_UID], @connection
-    @nfc_bricklet = BrickletNFC.new uids[:NFC_UID], @connection
-    @encoder_bricklet = BrickletRotaryEncoderV2.new uids[:ENCORDER_UID], @connection
-    @buttons_bricklet = BrickletDualButton.new uids[:BUTTONS_UID], @connection
-    @temperature_bricklet = BrickletTemperature.new uids[:TEMPERATURE_UID], @connection
+    @master_brick = BrickMaster.new settings['uids']['master_uid'], @connection
+    @nfc_bricklet = BrickletNFC.new settings['uids']['nfc_uid'], @connection
+    @encoder_bricklet = BrickletRotaryEncoderV2.new settings['uids']['encorder_uid'], @connection
+    @buttons_bricklet = BrickletDualButton.new settings['uids']['buttons_uid'], @connection
+    @temperature_bricklet = BrickletTemperature.new settings['uids']['temperature_uid'], @connection
 
     boot
-    @connection.connect host, port
+    @connection.connect settings['host'], settings['port']
     self
   end
 
@@ -233,11 +233,7 @@ class NfcSound
   end
 
   def get_songs_for(tag_id)
-    if @mapping[tag_id]
-      @mapping[tag_id][:songs_list].map{|s| [@songs_folder_path, s].join("/")}
-    else
-      []
-    end
+    @mapping[tag_id] ? @mapping[tag_id][:songs_list] : []
   end
 
   def fail_song
@@ -249,15 +245,16 @@ class NfcSound
   end
 
   def seek(idx)
-    @current_song_index = (@current_song_index + idx) % (@songs.length - 1)
+    @current_song_index = (@current_song_index + idx) % @songs.length
     @songs[@current_song_index]
   end
-
-  private
 
   def full_path_for(song)
     [@songs_folder_path, song].join("/")
   end
+
+  private
+
 
   def base_name_for(path)
     File.basename path
@@ -285,8 +282,7 @@ class Player < Audite
   def play(file, queue = true)
 
     if @active and queue
-      puts "#{position.ceil} / #{length_in_seconds.ceil}"
-      # puts [File.basename(file), current_song_name]
+      # puts "#{position.ceil} / #{length_in_seconds.ceil}"
       if File.basename(file) != current_song_name and not @song_list.map(&:file).include?(file)
         puts "Queuing new file #{file}"
         queue file
@@ -301,10 +297,9 @@ class Player < Audite
   end
 
   def stop
-    if player.active
+    if @active
       puts "Stopping playback."
-      player.stop_stream
-      sensors.set_leds(1, 1)
+      stop_stream
     end
   end
 

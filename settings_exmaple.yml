@@ -1,0 +1,15 @@
+---
+encoder_button_setup_delay: 3
+mapping_file: "./mapping.yml"
+songs_folder_path: "./songs"
+tinkerforge:
+  host: 'localhost'
+  port: 4223
+  secret: 'CHANGE_ME' # possibly not required :-/
+  uids:
+    master_uid:  'CHANGE_ME'
+    nfc_uid: 'CHANGE_ME'
+    encorder_uid: 'CHANGE_ME'
+    buttons_uid: 'CHANGE_ME'
+    temperature_uid: 'CHANGE_ME'
+

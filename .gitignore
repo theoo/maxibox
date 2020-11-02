@@ -2,3 +2,4 @@ songs/*
 !songs/fail.mp3
 songs/success.mp3
 mapping.yml
+settings.yml

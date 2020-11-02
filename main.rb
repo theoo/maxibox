@@ -3,30 +3,15 @@
 
 require './snd-maxi'
 require 'time'
+require 'yaml'
 
-MAPPING_FILE = "./mapping.yml"
-SONGS_FOLDER_PATH = "./songs"
-
-HOST = 'snd-maxi'
-PORT = 4223
-
-UIDS = {
-  MASTER_UID:  '6R4ZSS',
-  NFC_UID: 'Gub',
-  ENCORDER_UID: 'EqK',
-  BUTTONS_UID: 'vxG',
-  TEMPERATURE_UID: '5RS'
-}
-
-SECRET = 'guess_what?'
-
-ENCODER_BUTTON_SETUP_DELAY = 3
+SETTINGS = YAML::load_file("settings.yml")
 
 ########################################################################################################################
 
 player = Player.new
-mapping = NfcSound.new(MAPPING_FILE, SONGS_FOLDER_PATH)
-sensors = Sensors.new(UIDS, HOST, PORT, SECRET)
+mapping = NfcSound.new(SETTINGS['mapping_file'], SETTINGS['songs_folder_path'])
+sensors = Sensors.new(SETTINGS['tinkerforge'])
 mode = :read
 
 begin
@@ -40,7 +25,7 @@ begin
 
         if mode == :scan
           
-          if sensors.encoder_button_pressed_seconds > ENCODER_BUTTON_SETUP_DELAY 
+          if sensors.encoder_button_pressed_seconds > SETTINGS['encoder_button_setup_delay'] 
             puts "Recording a new chip."
             mapping.set_song_for(tag_id, player.current_song_name)
             player.play(mapping.success_song, false)
@@ -57,11 +42,17 @@ begin
           songs = mapping.get_songs_for(tag_id)
 
           if songs.length > 0
-            player.play(songs.sample)
+            current_song = player.active ? player.current_song_name : nil
+            if not player.active or not songs.include?(current_song)
+              player.play(mapping.full_path_for(songs.sample), false)
+            end
             sensors.set_leds(0, 0)
           elsif not sensors.encoder_button_status
             puts "Chip not recognized."
-            player.stop
+            if player.active and player.current_song_name != File.basename(mapping.fail_song)
+              player.stop 
+            end
+            sensors.set_leds(1, 1)
             player.play(mapping.fail_song)
           end
 
@@ -72,6 +63,7 @@ begin
       elsif sensors.nfc_status[:state] == 'absent' and mode == :read
 
         player.stop
+        sensors.set_leds(1, 1)
         sensors.request_reading
         
       end
