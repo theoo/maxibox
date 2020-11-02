@@ -13,6 +13,8 @@ player = Player.new
 mapping = NfcSound.new(SETTINGS['mapping_file'], SETTINGS['songs_folder_path'])
 sensors = Sensors.new(SETTINGS['tinkerforge'])
 mode = :read
+volume_mid_point = (SETTINGS['max_volume'] + SETTINGS['min_volume']) / 2
+last_volume = volume_mid_point
 
 begin
 
@@ -44,6 +46,7 @@ begin
           if songs.length > 0
             current_song = player.active ? player.current_song_name : nil
             if not player.active or not songs.include?(current_song)
+              # TODO: if file is not found, remove from mapping and continuer (play fail song)
               player.play(mapping.full_path_for(songs.sample), false)
             end
             sensors.set_leds(0, 0)
@@ -98,6 +101,21 @@ begin
         end
 
       end
+
+      if sensors.encoder != 0
+        # current_volume = `amixer get Master | grep -E "\[[0-9]+%\]" | awk -F"[]%[]" '{ print $2 }'`
+        
+        target_volume = volume_mid_point + sensors.encoder
+        target_volume = SETTINGS['min_volume'] if target_volume < SETTINGS['min_volume']
+        target_volume = SETTINGS['max_volume'] if SETTINGS['max_volume'] < target_volume
+
+        if last_volume != target_volume
+          puts "Set volume to #{target_volume}%"
+          `amixer set Master #{target_volume}%`
+          last_volume = target_volume
+        end
+      end
+
     end
 
     sleep 0.1

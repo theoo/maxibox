@@ -2,6 +2,8 @@
 encoder_button_setup_delay: 3
 mapping_file: "./mapping.yml"
 songs_folder_path: "./songs"
+min_volume: 25 # %
+max_volume: 75 # %
 tinkerforge:
   host: 'localhost'
   port: 4223
