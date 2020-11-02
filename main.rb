@@ -5,7 +5,8 @@ require_relative 'snd-maxi'
 require 'time'
 require 'yaml'
 
-SETTINGS = YAML::load_file("settings.yml")
+settings_path = File.expand_path("../settings.yml", __FILE__)
+SETTINGS = YAML::load_file(settings_path)
 
 ########################################################################################################################
 
