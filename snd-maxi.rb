@@ -227,7 +227,7 @@ class NfcSound
   def set_song_for(tag_id, song_name)
     @mapping[tag_id] = template if not @mapping[tag_id]
     list = @mapping[tag_id][:songs_list]
-    list.append(song_name)
+    list.push(song_name)
     @mapping[tag_id][:songs_list] = list.uniq
     save
   end
@@ -298,6 +298,14 @@ class Player < Audite
       puts "Playing '#{current_song_name}'"
     end
 
+  end
+
+  def stop
+    if player.active
+      puts "Stopping playback."
+      player.stop_stream
+      sensors.set_leds(1, 1)
+    end
   end
 
 end

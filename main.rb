@@ -61,6 +61,7 @@ begin
             sensors.set_leds(0, 0)
           elsif not sensors.encoder_button_status
             puts "Chip not recognized."
+            player.stop
             player.play(mapping.fail_song)
           end
 
@@ -70,13 +71,9 @@ begin
       
       elsif sensors.nfc_status[:state] == 'absent' and mode == :read
 
-        if player.active
-          puts "Stopping playback."
-          player.stop_stream
-          sensors.set_leds(1, 1)
-        end
-
+        player.stop
         sensors.request_reading
+        
       end
 
       if sensors.buttons[:right] and sensors.buttons[:left] and mode == :read
@@ -108,9 +105,7 @@ begin
           sensors.request_reading
         end
 
-
       end
-
     end
 
     sleep 0.1
