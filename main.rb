@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # -*- ruby encoding: utf-8 -*-
 
-require './snd-maxi'
+require_relative 'snd-maxi'
 require 'time'
 require 'yaml'
 
