@@ -27,8 +27,8 @@ begin
         tag_id = sensors.nfc_status[:data]
 
         if mode == :scan
-          
-          if sensors.encoder_button_pressed_seconds > SETTINGS['encoder_button_setup_delay'] 
+
+          if sensors.encoder_button_pressed_seconds > SETTINGS['encoder_button_setup_delay']
             puts "Recording a new chip."
             mapping.set_song_for(tag_id, player.current_song_name)
             player.play(mapping.success_song, false)
@@ -54,7 +54,7 @@ begin
           elsif not sensors.encoder_button_status
             puts "Chip not recognized."
             if player.active and player.current_song_name != File.basename(mapping.fail_song)
-              player.stop 
+              player.stop
             end
             sensors.set_leds(1, 1)
             player.play(mapping.fail_song)
@@ -63,13 +63,13 @@ begin
         end
 
         sensors.request_reading
-      
+
       elsif sensors.nfc_status[:state] == 'absent' and mode == :read
 
         player.stop
         sensors.set_leds(1, 1)
         sensors.request_reading
-        
+
       end
 
       if sensors.buttons[:right] and sensors.buttons[:left] and mode == :read
@@ -92,7 +92,7 @@ begin
           sensors.reset_buttons_counters
           sensors.request_reading
         end
-        
+
         # previous
         if sensors.buttons_counters[:left] > 0
           sleep 0.5
@@ -105,7 +105,7 @@ begin
 
       if sensors.encoder != 0
         # current_volume = `amixer get Master | grep -E "\[[0-9]+%\]" | awk -F"[]%[]" '{ print $2 }'`
-        
+
         target_volume = volume_mid_point + sensors.encoder
         target_volume = SETTINGS['min_volume'] if target_volume < SETTINGS['min_volume']
         target_volume = SETTINGS['max_volume'] if SETTINGS['max_volume'] < target_volume

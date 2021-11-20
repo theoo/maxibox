@@ -18,20 +18,20 @@ FAIL_SOUND_NAME = "fail.mp3"
 SUCCESS_SOUND_NAME = "success.mp3"
 
 class Sensors
-  
+
   attr_reader :nfc_status,
     :buttons,
     :buttons_counters,
     :encoder_button_status,
     :encoder
-  
+
   attr_accessor :connection
 
   def initialize(settings)
     @secret = settings['secret']
 
     @nfc_status = {state: 'pending'}
-    
+
     @buttons = {
       right: false,
       left: false
@@ -86,8 +86,8 @@ class Sensors
     @connection.disconnect
   end
 
-  private 
-    
+  private
+
     def boot
 
       @connection.register_callback(IPConnection::CALLBACK_CONNECTED) do |connect_reason|
@@ -110,9 +110,9 @@ class Sensors
           @encoder_bricklet.set_count_callback_configuration 1000, false, 'x', 0, 0
           # nfc_bricklet.set_response_expected_all
           @nfc_bricklet.set_mode BrickletNFC::MODE_READER
-          @buttons_bricklet.set_selected_led_state(BrickletDualButton::LED_LEFT, 
+          @buttons_bricklet.set_selected_led_state(BrickletDualButton::LED_LEFT,
             BrickletDualButton::LED_STATE_AUTO_TOGGLE_OFF)
-          @buttons_bricklet.set_selected_led_state(BrickletDualButton::LED_RIGHT, 
+          @buttons_bricklet.set_selected_led_state(BrickletDualButton::LED_RIGHT,
             BrickletDualButton::LED_STATE_AUTO_TOGGLE_OFF)
 
           puts 'Authentication succeeded'
@@ -131,7 +131,7 @@ class Sensors
         # Get current stack voltage
         stack_voltage = @master_brick.get_stack_voltage
         puts "Stack Voltage: #{stack_voltage/1000.0} V"
-        
+
         # Get current stack current
         stack_current = @master_brick.get_stack_current
         puts "Stack Current: #{stack_current/1000.0} A"
@@ -214,14 +214,14 @@ class NfcSound
   end
 
   def load
-    @mapping = YAML::load_file(@mapping_file_path) 
+    @mapping = YAML::load_file(@mapping_file_path)
     @mapping = {} unless @mapping
   end
 
   def save
     File.open(@mapping_file_path, 'w') do |f|
       f.write @mapping.to_yaml
-    end 
+    end
   end
 
   def set_song_for(tag_id, song_name)
