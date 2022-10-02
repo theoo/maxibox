@@ -68,7 +68,7 @@ begin
         sensors.request_reading
 
       elsif sensors.nfc_status[:state] == 'absent' and mode == :read\
-        and debounce_nfc_timer < Time.now + DEBOUNCE_NFC_INTERVAL
+        and debounce_nfc_timer + DEBOUNCE_NFC_INTERVAL < Time.now
 
         player.stop
         sensors.set_leds(1, 1)
