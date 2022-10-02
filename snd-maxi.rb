@@ -63,10 +63,6 @@ class Sensors
     @encoder_button_status ? Time.now - @encoder_last_press_time : 0
   end
 
-  def request_reading
-    @nfc_bricklet.set_mode BrickletNFC::MODE_READER
-  end
-
   def set_leds(left, right)
     @buttons_bricklet.set_led_state(left, right)
   end
@@ -123,8 +119,7 @@ class Sensors
       end
 
       @connection.register_callback(IPConnection::CALLBACK_ENUMERATE) do |uid, connected_uid, position,
-                                                                    hardware_version, firmware_version,
-                                                                    device_identifier, enumeration_type|
+        hardware_version, firmware_version, device_identifier, enumeration_type|
 
         puts "UID: #{uid}, Enumeration Type: #{enumeration_type}"
 
@@ -152,8 +147,10 @@ class Sensors
             end
 
             @nfc_status = {state: 'success', data: tag_id.join("")}
+            @nfc_bricklet.set_mode BrickletNFC::MODE_READER
           elsif state == BrickletNFC::READER_STATE_REQUEST_TAG_ID_ERROR
             @nfc_status = {state: 'absent'}
+            @nfc_bricklet.set_mode BrickletNFC::MODE_READER
           end
         rescue Exception => e
           @nfc_status = {state: 'fail'}

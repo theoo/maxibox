@@ -17,7 +17,6 @@ sensors = Sensors.new(SETTINGS['tinkerforge'])
 mode = :read
 volume_mid_point = (SETTINGS['max_volume'] + SETTINGS['min_volume']) / 2
 last_volume = volume_mid_point
-debounce_nfc_timer = Time.now
 
 begin
 
@@ -27,7 +26,6 @@ begin
 
       if sensors.nfc_status[:state] == 'success'
         tag_id = sensors.nfc_status[:data]
-        debounce_nfc_timer = Time.now
 
         if mode == :scan
 
@@ -65,14 +63,10 @@ begin
 
         end
 
-        sensors.request_reading
-
-      elsif sensors.nfc_status[:state] == 'absent' and mode == :read\
-        and debounce_nfc_timer + DEBOUNCE_NFC_INTERVAL < Time.now
+      elsif sensors.nfc_status[:state] == 'absent' and mode == :read
 
         player.stop
         sensors.set_leds(1, 1)
-        sensors.request_reading
 
       end
 
@@ -94,7 +88,6 @@ begin
           sleep 0.5
           player.play(mapping.seek(1), false)
           sensors.reset_buttons_counters
-          sensors.request_reading
         end
 
         # previous
@@ -102,7 +95,6 @@ begin
           sleep 0.5
           player.play(mapping.seek(-1), false)
           sensors.reset_buttons_counters
-          sensors.request_reading
         end
 
       end
