@@ -10,12 +10,14 @@ SETTINGS = YAML::load_file(settings_path)
 
 ########################################################################################################################
 
+DEBOUNCE_NFC_INTERVAL = 1
 player = Player.new
 mapping = NfcSound.new(SETTINGS['mapping_file'], SETTINGS['songs_folder_path'])
 sensors = Sensors.new(SETTINGS['tinkerforge'])
 mode = :read
 volume_mid_point = (SETTINGS['max_volume'] + SETTINGS['min_volume']) / 2
 last_volume = volume_mid_point
+debounce_nfc_timer = Time.now
 
 begin
 
@@ -25,6 +27,7 @@ begin
 
       if sensors.nfc_status[:state] == 'success'
         tag_id = sensors.nfc_status[:data]
+        debounce_nfc_timer = Time.now
 
         if mode == :scan
 
@@ -52,7 +55,7 @@ begin
             end
             sensors.set_leds(0, 0)
           elsif not sensors.encoder_button_status
-            puts "Chip not recognized."
+            puts "Chip not recognized #{tag_id}."
             if player.active and player.current_song_name != File.basename(mapping.fail_song)
               player.stop
             end
@@ -64,7 +67,8 @@ begin
 
         sensors.request_reading
 
-      elsif sensors.nfc_status[:state] == 'absent' and mode == :read
+      elsif sensors.nfc_status[:state] == 'absent' and mode == :read\
+        and debounce_nfc_timer < Time.now + DEBOUNCE_NFC_INTERVAL
 
         player.stop
         sensors.set_leds(1, 1)
